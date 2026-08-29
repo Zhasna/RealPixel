@@ -5,6 +5,7 @@ const axios = require('axios');
 const FormData = require('form-data');
 const Scan = require('../models/Scan');
 const optionalAuth = require('../middleware/optionalAuth');
+const authMiddleware = require('../middleware/authMiddleware');
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -37,6 +38,15 @@ router.post('/', optionalAuth, upload.single('file'), async (req, res) => {
     res.status(201).json(scan);
   } catch (err) {
     res.status(500).json({ message: 'Scan failed', error: err.message });
+  }
+});
+
+router.get('/', authMiddleware, async (req, res) => {
+  try {
+    const scans = await Scan.find({ user: req.userId }).sort({ createdAt: -1 });
+    res.json(scans);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch history', error: err.message });
   }
 });
 
