@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { getToken } from '../auth';
 
 function UploadPage() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
-    setResult(null);
     setError(null);
   };
 
@@ -25,8 +25,13 @@ function UploadPage() {
     formData.append('file', file);
 
     try {
+      const token = getToken();
+
       const response = await axios.post('http://localhost:5000/api/scan', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          ...(token && { Authorization: `Bearer ${token}` })
+        }
       });
       navigate('/results', { state: { result: response.data } });
     } catch (err) {
@@ -34,7 +39,7 @@ function UploadPage() {
     } finally {
       setLoading(false);
     }
-  };   
+  };
 
   return (
     <div style={{ padding: '40px', maxWidth: '600px' }}>
