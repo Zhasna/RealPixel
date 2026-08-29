@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function UploadPage() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
-
+  const navigate = useNavigate();
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
     setResult(null);
@@ -27,13 +28,13 @@ function UploadPage() {
       const response = await axios.post('http://localhost:5000/api/scan', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      setResult(response.data);
+      navigate('/results', { state: { result: response.data } });
     } catch (err) {
       setError('Scan failed. Please try again.');
     } finally {
       setLoading(false);
     }
-  };
+  };   
 
   return (
     <div style={{ padding: '40px', maxWidth: '600px' }}>
@@ -50,19 +51,6 @@ function UploadPage() {
       </form>
 
       {error && <p style={{ color: 'var(--danger)', marginTop: '16px' }}>{error}</p>}
-
-      {result && (
-        <div style={{ marginTop: '24px', padding: '16px', background: 'var(--surface-1)', borderRadius: 'var(--radius)' }}>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--text-secondary)' }}>Verdict</p>
-          <p style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '20px',
-            color: result.verdict === 'manipulated' ? 'var(--danger)' : 'var(--success)'
-          }}>
-            {result.verdict.toUpperCase()} — {(result.fakeProbability * 100).toFixed(1)}% fake probability
-          </p>
-        </div>
-      )}
     </div>
   );
 }
