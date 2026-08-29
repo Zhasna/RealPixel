@@ -4,11 +4,11 @@ const multer = require('multer');
 const axios = require('axios');
 const FormData = require('form-data');
 const Scan = require('../models/Scan');
-const authMiddleware = require('../middleware/authMiddleware');
+const optionalAuth = require('../middleware/optionalAuth');
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.post('/', authMiddleware, upload.single('file'), async (req, res) => {
+router.post('/', optionalAuth, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
