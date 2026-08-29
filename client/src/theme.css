@@ -1,0 +1,44 @@
+:root {
+  /* Surfaces */
+  --bg: #14161A;
+  --surface-1: #1C1F26;
+  --surface-2: #23262E;
+  --border: #2C2F38;
+  --border-strong: #3A3E48;
+
+  /* Text */
+  --text-primary: #E8E6E1;
+  --text-secondary: #A8A6A0;
+  --text-muted: #6E6C68;
+
+  /* Accent */
+  --accent: #C9642F;
+  --accent-hover: #D97840;
+
+  /* Verdict colors */
+  --danger: #B23A34;
+  --danger-fill: rgba(178, 58, 52, 0.15);
+  --success: #3F7857;
+  --success-fill: rgba(63, 120, 87, 0.15);
+  --warning: #B3852F;
+
+  /* Type */
+  --font-serif: 'Fraunces', serif;
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  /* Spacing/radius */
+  --radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+}
