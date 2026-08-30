@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { getToken, isLoggedIn } from '../auth';
 
 function HistoryPage() {
@@ -31,42 +31,47 @@ function HistoryPage() {
     fetchHistory();
   }, [navigate]);
 
-  if (loading) return <p style={{ padding: '40px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>Loading...</p>;
-  if (error) return <p style={{ padding: '40px', color: 'var(--danger)' }}>{error}</p>;
+  if (loading) return <div className="page"><p className="label-mono">Loading...</p></div>;
+  if (error) return <div className="page"><p style={{ color: 'var(--danger)' }}>{error}</p></div>;
 
   return (
-    <div style={{ padding: '40px', maxWidth: '700px' }}>
-      <h2 style={{ fontFamily: 'var(--font-serif)', marginBottom: '20px' }}>Scan history</h2>
+    <div className="page">
+      <div style={{ marginBottom: '28px' }}>
+        <p className="label-mono" style={{ marginBottom: '6px' }}>CASE ARCHIVE</p>
+        <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '28px' }}>Scan history</h2>
+      </div>
 
       {scans.length === 0 ? (
-        <p style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', fontSize: '13px' }}>
-          No scans yet.
-        </p>
+        <div className="card" style={{ textAlign: 'center' }}>
+          <p style={{ color: 'var(--text-muted)' }}>No scans yet — analyzed images will appear here.</p>
+        </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {scans.map((scan) => (
             <div
               key={scan._id}
               onClick={() => navigate('/results', { state: { result: scan } })}
+              className="card"
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                background: 'var(--surface-1)',
-                borderRadius: 'var(--radius)',
-                padding: '14px 18px',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                padding: '16px 20px',
+                transition: 'border-color 0.15s ease',
+                border: '1px solid transparent'
               }}
+              onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--border-strong)'}
+              onMouseLeave={(e) => e.currentTarget.style.borderColor = 'transparent'}
             >
               <div>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13px' }}>{scan.filename}</p>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)' }}>
-                  {new Date(scan.createdAt).toLocaleString()}
-                </p>
+                <p style={{ fontSize: '14px', marginBottom: '4px' }}>{scan.filename}</p>
+                <p className="label-mono">{new Date(scan.createdAt).toLocaleString()}</p>
               </div>
               <p style={{
                 fontFamily: 'var(--font-mono)',
                 fontSize: '13px',
+                fontWeight: 500,
                 color: scan.verdict === 'manipulated' ? 'var(--danger)' : 'var(--success)'
               }}>
                 {scan.verdict.toUpperCase()}

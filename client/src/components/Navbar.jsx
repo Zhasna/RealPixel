@@ -16,24 +16,29 @@ function Navbar() {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: '16px 40px',
-      borderBottom: '0.5px solid var(--border)'
+      padding: '18px 32px',
+      borderBottom: '1px solid var(--border)',
+      background: 'var(--bg)'
     }}>
-      <Link to="/" style={{ fontFamily: 'var(--font-serif)', fontSize: '20px', color: 'var(--text-primary)', textDecoration: 'none' }}>
+      <Link to="/" style={{ fontFamily: 'var(--font-serif)', fontSize: '19px', color: 'var(--text-primary)', fontWeight: 500 }}>
         RealPixel
       </Link>
 
-      <div style={{ display: 'flex', gap: '16px', alignItems: 'center', fontFamily: 'var(--font-mono)', fontSize: '13px' }}>
+      <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
         {loggedIn ? (
           <>
-            <span style={{ color: 'var(--text-secondary)' }}>Hi, {user?.name}</span>
-            <Link to="/history" style={{ color: 'var(--text-primary)' }}>History</Link>
-            <button onClick={handleLogout} style={{ fontSize: '13px' }}>Log out</button>
+            <span className="label-mono">Hi, {user?.name}</span>
+            <Link to="/history" style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--text-primary)' }}>
+              History
+            </Link>
+            <button className="secondary" onClick={handleLogout}>Log out</button>
           </>
         ) : (
           <>
-            <Link to="/login" style={{ color: 'var(--text-primary)' }}>Log in</Link>
-            <Link to="/register" style={{ color: 'var(--text-primary)' }}>Register</Link>
+            <Link to="/login" style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: 'var(--text-primary)' }}>
+              Log in
+            </Link>
+            <button onClick={() => navigate('/register')}>Register</button>
           </>
         )}
       </div>

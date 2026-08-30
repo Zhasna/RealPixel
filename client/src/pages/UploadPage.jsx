@@ -26,7 +26,6 @@ function UploadPage() {
 
     try {
       const token = getToken();
-
       const response = await axios.post('http://localhost:5000/api/scan', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -42,20 +41,26 @@ function UploadPage() {
   };
 
   return (
-    <div style={{ padding: '40px', maxWidth: '600px' }}>
-      <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '28px' }}>RealPixel</h1>
-      <p style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', fontSize: '13px', marginBottom: '24px' }}>
-        Upload an image to check for signs of manipulation
-      </p>
+    <div className="page">
+      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+        <p className="label-mono" style={{ marginBottom: '10px' }}>MEDIA VERIFICATION</p>
+        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', marginBottom: '10px' }}>RealPixel</h1>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '15px' }}>
+          Upload an image to check for signs of AI manipulation
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit}>
-        <input type="file" accept="image/*" onChange={handleFileChange} />
-        <button type="submit" disabled={!file || loading} style={{ marginLeft: '12px' }}>
-          {loading ? 'Analyzing...' : 'Analyze'}
-        </button>
-      </form>
+      <div className="card">
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center', padding: '20px 0' }}>
+          <input type="file" accept="image/*" onChange={handleFileChange} />
+          <p className="label-mono">JPG or PNG, up to 10MB</p>
+          <button type="submit" disabled={!file || loading}>
+            {loading ? 'Analyzing...' : 'Analyze image'}
+          </button>
+        </form>
+      </div>
 
-      {error && <p style={{ color: 'var(--danger)', marginTop: '16px' }}>{error}</p>}
+      {error && <p style={{ color: 'var(--danger)', marginTop: '16px', textAlign: 'center' }}>{error}</p>}
     </div>
   );
 }
