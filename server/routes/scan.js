@@ -25,17 +25,31 @@ router.post('/', optionalAuth, upload.single('file'), async (req, res) => {
     );
 
     const fakeProbability = mlResponse.data.fake_probability;
+    const elaScore = mlResponse.data.ela_score;
+    const elaHeatmap = mlResponse.data.ela_heatmap;
+    const fftScore = mlResponse.data.fft_score;
+    const fftHeatmap = mlResponse.data.fft_heatmap;
     const verdict = fakeProbability > 0.5 ? 'manipulated' : 'authentic';
 
-    const scan = new Scan({
-      user: req.userId,
+    const resultPayload = {
       filename: req.file.originalname,
       fakeProbability,
-      verdict
-    });
-    await scan.save();
+      verdict,
+      elaScore,
+      elaHeatmap,
+      fftScore,
+      fftHeatmap,
+      createdAt: new Date()
+    };
 
-    res.status(201).json(scan);
+    try {
+      const scan = new Scan({ user: req.userId, ...resultPayload });
+      await scan.save();
+      return res.status(201).json(scan);
+    } catch (dbErr) {
+      console.error('Scan succeeded but failed to save to DB:', dbErr.message);
+      return res.status(201).json({ ...resultPayload, _id: null, saved: false });
+    }
   } catch (err) {
     res.status(500).json({ message: 'Scan failed', error: err.message });
   }
