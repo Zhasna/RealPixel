@@ -34,6 +34,9 @@ const ScanSchema = new mongoose.Schema({
   },
   fftHeatmap: {
     type: String
+  },
+  gradcamHeatmap: {
+    type: String
   }
 });
 

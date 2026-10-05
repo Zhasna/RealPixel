@@ -29,6 +29,7 @@ router.post('/', optionalAuth, upload.single('file'), async (req, res) => {
     const elaHeatmap = mlResponse.data.ela_heatmap;
     const fftScore = mlResponse.data.fft_score;
     const fftHeatmap = mlResponse.data.fft_heatmap;
+    const gradcamHeatmap = mlResponse.data.gradcam_heatmap;
     const verdict = fakeProbability > 0.5 ? 'manipulated' : 'authentic';
 
     const resultPayload = {
@@ -39,6 +40,7 @@ router.post('/', optionalAuth, upload.single('file'), async (req, res) => {
       elaHeatmap,
       fftScore,
       fftHeatmap,
+      gradcamHeatmap,
       createdAt: new Date()
     };
 

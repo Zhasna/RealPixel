@@ -6,11 +6,13 @@ import io
 from PIL import Image
 from ela import compute_ela
 from fft_analysis import compute_fft
+from grad_cam import build_grad_model, generate_gradcam
 
 app = FastAPI()
 
 classifier = Meso4()
 classifier.load('model/weights/Meso4_DF.h5')
+grad_model = build_grad_model(classifier.model)
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
@@ -26,11 +28,13 @@ async def predict(file: UploadFile = File(...)):
 
     ela_score, ela_heatmap = compute_ela(img)
     fft_score, fft_heatmap = compute_fft(img)
+    gradcam_heatmap = generate_gradcam(grad_model, x, np.array(resized))
 
     return {
         "fake_probability": fake_probability,
         "ela_score": ela_score,
         "ela_heatmap": ela_heatmap,
         "fft_score": fft_score,
-        "fft_heatmap": fft_heatmap
+        "fft_heatmap": fft_heatmap,
+        "gradcam_heatmap": gradcam_heatmap
     }

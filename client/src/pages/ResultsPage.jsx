@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 function ResultsPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const result = location.state?.result;
+  const [showDetails, setShowDetails] = useState(false);
 
   if (!result) {
     return (
@@ -52,51 +54,84 @@ function ResultsPage() {
         </div>
       </div>
 
-      {result.elaHeatmap && (
-        <div className="card" style={{ marginBottom: '20px' }}>
-          <p className="label-mono" style={{ marginBottom: '12px' }}>Error Level Analysis</p>
-          <img
-            src={`data:image/png;base64,${result.elaHeatmap}`}
-            alt="ELA heatmap"
-            style={{ width: '100%', borderRadius: 'var(--radius)', display: 'block' }}
-          />
-          <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '10px' }}>
-            Brighter regions indicate inconsistent compression history — a supporting forensic signal, not a standalone verdict.
-          </p>
-        </div>
-      )}
-
       <div className="card" style={{ marginBottom: '20px' }}>
-        <p className="label-mono" style={{ marginBottom: '14px' }}>Signal breakdown</p>
-
-        <div style={{ marginBottom: '14px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}>
-            <span>CNN classifier (primary)</span>
-            <span style={{ fontFamily: 'var(--font-mono)', color: verdictColor }}>{confidence}%</span>
-          </div>
-          <div style={{ height: '4px', background: 'var(--surface-2)', borderRadius: '2px', overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${confidence}%`, background: verdictColor }} />
-          </div>
-        </div>
-
-        {typeof result.fftScore === 'number' && (
-          <div style={{ marginBottom: '14px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}>
-              <span>Frequency domain anomaly</span>
-              <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>
-                {(result.fftScore * 100).toFixed(1)}%
-              </span>
-            </div>
-            <div style={{ height: '4px', background: 'var(--surface-2)', borderRadius: '2px', overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${result.fftScore * 100}%`, background: 'var(--accent)' }} />
-            </div>
-          </div>
-        )}
-
-        <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-          Only the CNN classifier determines the verdict. Other signals are shown as supporting context.
+        <p className="label-mono" style={{ marginBottom: '6px' }}>Fake probability</p>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '32px', fontWeight: 500, color: verdictColor }}>
+          {confidence}%
         </p>
       </div>
+
+      <button
+        className="secondary"
+        onClick={() => setShowDetails(!showDetails)}
+        style={{ marginBottom: '20px', width: '100%' }}
+      >
+        {showDetails ? 'Hide forensic evidence' : 'Show forensic evidence'}
+      </button>
+
+      {showDetails && (
+        <>
+          {result.gradcamHeatmap && (
+            <div className="card" style={{ marginBottom: '20px' }}>
+              <p className="label-mono" style={{ marginBottom: '12px' }}>What the model looked at (Grad-CAM)</p>
+              <img
+                src={`data:image/png;base64,${result.gradcamHeatmap}`}
+                alt="Grad-CAM overlay"
+                style={{ width: '100%', borderRadius: 'var(--radius)', display: 'block' }}
+              />
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '10px' }}>
+                Warmer regions show where the classifier focused most when making its decision.
+              </p>
+            </div>
+          )}
+
+          {result.elaHeatmap && (
+            <div className="card" style={{ marginBottom: '20px' }}>
+              <p className="label-mono" style={{ marginBottom: '12px' }}>Error Level Analysis</p>
+              <img
+                src={`data:image/png;base64,${result.elaHeatmap}`}
+                alt="ELA heatmap"
+                style={{ width: '100%', borderRadius: 'var(--radius)', display: 'block' }}
+              />
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '10px' }}>
+                Brighter regions indicate inconsistent compression history — a supporting forensic signal, not a standalone verdict.
+              </p>
+            </div>
+          )}
+
+          <div className="card" style={{ marginBottom: '20px' }}>
+            <p className="label-mono" style={{ marginBottom: '14px' }}>Signal breakdown</p>
+
+            <div style={{ marginBottom: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}>
+                <span>CNN classifier (primary)</span>
+                <span style={{ fontFamily: 'var(--font-mono)', color: verdictColor }}>{confidence}%</span>
+              </div>
+              <div style={{ height: '4px', background: 'var(--surface-2)', borderRadius: '2px', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${confidence}%`, background: verdictColor }} />
+              </div>
+            </div>
+
+            {typeof result.fftScore === 'number' && (
+              <div style={{ marginBottom: '14px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}>
+                  <span>Frequency domain anomaly</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>
+                    {(result.fftScore * 100).toFixed(1)}%
+                  </span>
+                </div>
+                <div style={{ height: '4px', background: 'var(--surface-2)', borderRadius: '2px', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${result.fftScore * 100}%`, background: 'var(--accent)' }} />
+                </div>
+              </div>
+            )}
+
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+              Only the CNN classifier determines the verdict. Other signals are shown as supporting context.
+            </p>
+          </div>
+        </>
+      )}
 
       <button className="secondary" onClick={() => navigate('/')}>Analyze another</button>
     </div>
