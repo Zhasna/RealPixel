@@ -7,9 +7,36 @@ const Scan = require('../models/Scan');
 const optionalAuth = require('../middleware/optionalAuth');
 const authMiddleware = require('../middleware/authMiddleware');
 
-const upload = multer({ storage: multer.memoryStorage() });
+const FAKE_THRESHOLD = 0.35; // tuned on a held-out split, see benchmark
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
-router.post('/', optionalAuth, upload.single('file'), async (req, res) => {
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_FILE_SIZE },
+  fileFilter: (req, file, cb) => {
+    if (ALLOWED_TYPES.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only JPG, PNG, or WebP images are supported'));
+    }
+  }
+});
+
+// Wrap multer so its errors come back as clean JSON instead of a crash page
+function handleUpload(req, res, next) {
+  upload.single('file')(req, res, (err) => {
+    if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ message: 'File too large (max 10 MB)' });
+    }
+    if (err) {
+      return res.status(400).json({ message: err.message });
+    }
+    next();
+  });
+}
+
+router.post('/', optionalAuth, handleUpload, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
@@ -21,7 +48,7 @@ router.post('/', optionalAuth, upload.single('file'), async (req, res) => {
     const mlResponse = await axios.post(
       `${process.env.ML_SERVICE_URL}/predict`,
       formData,
-      { headers: formData.getHeaders() }
+      { headers: formData.getHeaders(), maxBodyLength: Infinity, timeout: 60000 }
     );
 
     const fakeProbability = mlResponse.data.fake_probability;
@@ -30,7 +57,6 @@ router.post('/', optionalAuth, upload.single('file'), async (req, res) => {
     const fftScore = mlResponse.data.fft_score;
     const fftHeatmap = mlResponse.data.fft_heatmap;
     const gradcamHeatmap = mlResponse.data.gradcam_heatmap;
-    const FAKE_THRESHOLD = 0.35;
     const verdict = fakeProbability > FAKE_THRESHOLD ? 'manipulated' : 'authentic';
 
     const resultPayload = {
@@ -54,6 +80,12 @@ router.post('/', optionalAuth, upload.single('file'), async (req, res) => {
       return res.status(201).json({ ...resultPayload, _id: null, saved: false });
     }
   } catch (err) {
+    if (err.response && err.response.status === 400) {
+      return res.status(400).json({ message: err.response.data?.detail || 'Could not process this image' });
+    }
+    if (err.code === 'ECONNREFUSED' || err.code === 'ECONNABORTED') {
+      return res.status(503).json({ message: 'Analysis service is unavailable. Please try again shortly.' });
+    }
     res.status(500).json({ message: 'Scan failed', error: err.message });
   }
 });

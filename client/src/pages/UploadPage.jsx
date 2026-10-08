@@ -3,6 +3,9 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { getToken } from '../auth';
 
+const MAX_SIZE = 10 * 1024 * 1024;
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
 function UploadPage() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -10,8 +13,24 @@ function UploadPage() {
   const navigate = useNavigate();
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selected = e.target.files[0];
     setError(null);
+
+    if (!selected) {
+      setFile(null);
+      return;
+    }
+    if (!ALLOWED_TYPES.includes(selected.type)) {
+      setFile(null);
+      setError('Please choose a JPG, PNG, or WebP image.');
+      return;
+    }
+    if (selected.size > MAX_SIZE) {
+      setFile(null);
+      setError('That file is larger than 10 MB. Please choose a smaller image.');
+      return;
+    }
+    setFile(selected);
   };
 
   const handleSubmit = async (e) => {
@@ -34,7 +53,7 @@ function UploadPage() {
       });
       navigate('/results', { state: { result: response.data } });
     } catch (err) {
-      setError('Scan failed. Please try again.');
+      setError(err.response?.data?.message || 'Scan failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -52,8 +71,11 @@ function UploadPage() {
 
       <div className="card">
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center', padding: '20px 0' }}>
-          <input type="file" accept="image/*" onChange={handleFileChange} />
-          <p className="label-mono">JPG or PNG, up to 10MB</p>
+          <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFileChange} />
+          <p className="label-mono">JPG, PNG or WebP, up to 10 MB</p>
+          <p className="label-mono" style={{ textAlign: 'center' }}>
+            Works best on clear photos of a single face.
+          </p>
           <button type="submit" disabled={!file || loading}>
             {loading ? 'Analyzing...' : 'Analyze image'}
           </button>

@@ -55,7 +55,7 @@ function ResultsPage() {
       </div>
 
       <div className="card" style={{ marginBottom: '20px' }}>
-        <p className="label-mono" style={{ marginBottom: '6px' }}>Fake probability</p>
+        <p className="label-mono" style={{ marginBottom: '6px' }}>Manipulation Score</p>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '32px', fontWeight: 500, color: verdictColor }}>
           {confidence}%
         </p>

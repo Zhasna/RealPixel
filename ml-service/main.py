@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from classifiers import Meso4
 from tensorflow.keras.preprocessing import image
 import numpy as np
@@ -14,10 +14,19 @@ classifier = Meso4()
 classifier.load('model/weights/Meso4_DF.h5')
 grad_model = build_grad_model(classifier.model)
 
+MAX_DIMENSION = 2048  # cap very large photos so ELA/FFT stay fast
+
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
     contents = await file.read()
-    img = Image.open(io.BytesIO(contents)).convert('RGB')
+
+    try:
+        img = Image.open(io.BytesIO(contents)).convert('RGB')
+    except Exception:
+        raise HTTPException(status_code=400, detail='Could not read this file as an image. It may be corrupted.')
+
+    if max(img.size) > MAX_DIMENSION:
+        img.thumbnail((MAX_DIMENSION, MAX_DIMENSION))
 
     resized = img.resize((256, 256))
     x = image.img_to_array(resized) / 255.0
