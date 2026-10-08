@@ -30,7 +30,8 @@ router.post('/', optionalAuth, upload.single('file'), async (req, res) => {
     const fftScore = mlResponse.data.fft_score;
     const fftHeatmap = mlResponse.data.fft_heatmap;
     const gradcamHeatmap = mlResponse.data.gradcam_heatmap;
-    const verdict = fakeProbability > 0.5 ? 'manipulated' : 'authentic';
+    const FAKE_THRESHOLD = 0.35;
+    const verdict = fakeProbability > FAKE_THRESHOLD ? 'manipulated' : 'authentic';
 
     const resultPayload = {
       filename: req.file.originalname,
