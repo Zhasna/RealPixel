@@ -2,6 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { saveSession } from '../auth';
+import { API_URL } from '../config';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
@@ -20,7 +21,7 @@ function LoginPage() {
     setFieldErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+      const response = await axios.post(`${API_URL}/api/auth/login`, { email, password });
       saveSession(response.data.token, response.data.user);
       navigate('/');
     } catch {

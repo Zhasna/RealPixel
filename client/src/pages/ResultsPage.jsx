@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { isLoggedIn } from '../auth';
+import { API_URL } from '../config';
 
 function ResultsPage() {
   const location = useLocation();

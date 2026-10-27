@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { getToken, isLoggedIn } from '../auth';
+import { API_URL } from '../config';
 
-const API = 'http://localhost:5000/api/scan';
+const API = `${API_URL}/api/scan`;
 
 function HistoryPage() {
   const [scans, setScans] = useState([]);
