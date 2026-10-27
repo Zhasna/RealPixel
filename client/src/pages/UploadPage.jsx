@@ -62,7 +62,7 @@ function UploadPage() {
 
     try {
       const token = getToken();
-      const response = await axios.post('http://localhost:5000/api/scan', formData, {
+      const response = await axios.post(`${API_URL}/api/scan`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           ...(token && { Authorization: `Bearer ${token}` })
