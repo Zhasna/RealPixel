@@ -10,6 +10,10 @@ from grad_cam import build_grad_model, generate_gradcam
 
 app = FastAPI()
 
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
 classifier = Meso4()
 classifier.load('model/weights/Meso4_DF.h5')
 grad_model = build_grad_model(classifier.model)

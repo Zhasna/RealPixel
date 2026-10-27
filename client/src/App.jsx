@@ -18,6 +18,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/history" element={<HistoryPage />} />
       </Routes>
+      <footer><div className="container">RealPixel · Results are probabilistic and should not be treated as a definitive verdict.</div></footer>
     </BrowserRouter>
   );
 }

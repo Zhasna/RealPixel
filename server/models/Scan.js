@@ -37,6 +37,12 @@ const ScanSchema = new mongoose.Schema({
   },
   gradcamHeatmap: {
     type: String
+  },
+  note: {
+    type: String,
+    default: '',
+    trim: true,
+    maxlength: 200
   }
 });
 

@@ -2,10 +2,12 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const axios = require('axios');
+const mongoose = require('mongoose');
 const FormData = require('form-data');
 const Scan = require('../models/Scan');
 const optionalAuth = require('../middleware/optionalAuth');
 const authMiddleware = require('../middleware/authMiddleware');
+
 
 const FAKE_THRESHOLD = 0.35; // tuned on a held-out split, see benchmark
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -98,5 +100,54 @@ router.get('/', authMiddleware, async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch history', error: err.message });
   }
 });
+
+router.patch('/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid scan id' });
+    }
+
+    const { note } = req.body;
+    if (typeof note !== 'string') {
+      return res.status(400).json({ message: 'A text note is required' });
+    }
+    if (note.length > 200) {
+      return res.status(400).json({ message: 'Note must be 200 characters or fewer' });
+    }
+
+    const scan = await Scan.findOneAndUpdate(
+      { _id: id, user: req.userId },   // only the owner can edit
+      { note: note.trim() },
+      { new: true, runValidators: true }
+    ).select('note');
+
+    if (!scan) {
+      return res.status(404).json({ message: 'Scan not found' });
+    }
+    res.json({ _id: scan._id, note: scan.note });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to update scan', error: err.message });
+  }
+});
+
+
+router.delete('/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid scan id' });
+    }
+
+    const result = await Scan.deleteOne({ _id: id, user: req.userId });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: 'Scan not found' });
+    }
+    res.json({ message: 'Scan deleted', id });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to delete scan', error: err.message });
+  }
+});
+
 
 module.exports = router;
